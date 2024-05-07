@@ -12,6 +12,24 @@ module.exports.getAllBooks = async (req, res) => {
     }
 }
 
+module.exports.getNewestBooks = async (req, res) => {
+    try {
+        const books = await Book.find().sort({ createdAt: -1 }).limit(10)
+        res.status(200).json({ message: 'Newest books', data: books})
+    } catch (error) {
+        res.status(500).json({ message: error.message })
+    }
+}
+
+module.exports.getPopularBooks = async (req, res) => {
+    try {
+        const books = await Book.find().sort({ rating: -1 }).limit(10)
+        res.status(200).json({ message: 'Popular books', data: books})
+    } catch (error) {
+        res.status(500).json({ message: error.message })
+    }
+}
+
 module.exports.getBookById = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
