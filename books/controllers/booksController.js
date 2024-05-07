@@ -4,6 +4,8 @@ const { validationResult } = require('express-validator')
 module.exports.getAllBooks = async (req, res) => {
     try {
         const books = await Book.find()
+            .populate('author', 'name')
+            .populate('genre', 'name');
         res.status(200).json({ message: 'All books ', data: books})
     } catch (error) {
         res.status(500).json({ message: error.message })

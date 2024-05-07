@@ -1,5 +1,5 @@
 const booksRouter = require('./routes/booksRouter')
-// const usersRouter = require('./routes/usersRouter')
+const genresRouter = require('./routes/genresRouter')
 
 const setupRoutes = (app) => {
     app.get('/', (req, res) => {
@@ -7,7 +7,7 @@ const setupRoutes = (app) => {
     })
 
     app.use('/books', booksRouter)
-    // app.use('/users', usersRouter)
+    app.use('/genres', genresRouter)
 }
 
 module.exports = setupRoutes;
