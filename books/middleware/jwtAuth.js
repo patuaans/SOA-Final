@@ -25,4 +25,4 @@ const jwtAuth = (allowedRoles) => {
     };
 };
 
-module.exports = jwtAuth;
+module.exports = { jwtAuth };

@@ -4,8 +4,8 @@ const { validationResult } = require('express-validator')
 module.exports.getAllBooks = async (req, res) => {
     try {
         const books = await Book.find()
-            .populate('author', 'name')
-            .populate('genre', 'name');
+            .populate('authors', 'name')
+            .populate('authors', 'author');
         res.status(200).json({ message: 'All books ', data: books})
     } catch (error) {
         res.status(500).json({ message: error.message })
@@ -29,6 +29,32 @@ module.exports.getPopularBooks = async (req, res) => {
         res.status(500).json({ message: error.message })
     }
 }
+
+module.exports.findSimilarBooks = async (req, res) => {
+    const { search } = req.query;
+
+    if (!search) {
+        return res.status(400).json({ message: 'Please provide a search term.' });
+    }
+
+    const searchRegex = new RegExp(search, 'i'); // Case-insensitive search
+
+    try {
+        const books = await Book.find({
+            $or: [
+                { title: searchRegex },
+                { 'authors.name': searchRegex }
+            ]
+        })
+        .populate('authors', 'name')
+        .populate('authors', 'author');
+
+        res.status(200).json({ message: 'Similar books found', data: books });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 
 module.exports.getBookById = async (req, res) => {
     const errors = validationResult(req);

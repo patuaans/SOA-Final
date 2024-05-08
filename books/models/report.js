@@ -5,31 +5,27 @@ const reportSchema = new Schema({
     book_id: {
         type: Schema.Types.ObjectId,
         ref: 'Book',
-        required: true 
+        required: true
     },
     user_id: {
         type: Schema.Types.ObjectId,
-        ref: 'User',  
+        ref: 'User',
         required: true
     },
     reason: {
-        type: [String], 
+        type: [String],
         enum: ['Copyright Violation', 'Inappropriate Content', 'Other'],
         required: true
     },
     description: {
         type: String
     },
-    timestamp: {
-        type: Date,
-        default: Date.now
-    },
     status: {
         type: String,
         enum: ['pending', 'reviewed', 'resolved'],
         default: 'pending'
     }
-});
+}, { timestamps: true });
 
 const Report = mongoose.model('Report', reportSchema);
 module.exports = Report;

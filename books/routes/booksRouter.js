@@ -6,6 +6,7 @@ const { bookValidator } = require('../middleware/bookValidator')
 router.get('/', booksController.getAllBooks)
 router.get('/newest', booksController.getNewestBooks)
 router.get('/popular', booksController.getPopularBooks)
+router.get('/similar', booksController.findSimilarBooks); 
 router.get('/:id', bookValidator.getBookById, booksController.getBookById)
 router.post('/', bookValidator.createBook, booksController.createBook)
 router.put('/:id', bookValidator.updateBook, booksController.updateBook)

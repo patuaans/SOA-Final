@@ -1,6 +1,6 @@
 const booksRouter = require('./routes/booksRouter')
 const genresRouter = require('./routes/genresRouter')
-// const reportsRouter = require('./routes/reportsRouter')
+const reportsRouter = require('./routes/reportsRouter')
 
 const setupRoutes = (app) => {
     app.get('/', (req, res) => {
@@ -9,7 +9,7 @@ const setupRoutes = (app) => {
 
     app.use('/books', booksRouter)
     app.use('/genres', genresRouter)
-    // app.use('/reports', reportsRouter)
+    app.use('/reports', reportsRouter)
 }
 
 module.exports = setupRoutes;
