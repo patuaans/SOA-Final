@@ -1,5 +1,5 @@
 require('dotenv').config()
-const User = require('../models/User')
+const User = require('../models/user')
 const { validationResult } = require('express-validator')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken');
@@ -72,7 +72,7 @@ module.exports.loginUser = async (req, res) => {
             // secure: true, // Uncomment if using HTTPS
             // maxAge: 3600000, // Set cookie expiration time (1 hour in milliseconds)
         });
-        res.redirect('/')
+        res.json({ message: 'Login successful', token });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
