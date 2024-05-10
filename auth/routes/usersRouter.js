@@ -4,7 +4,7 @@ const usersController = require('../controllers/usersController')
 const { userValidator } = require('../middleware/userValidator')
 const jwtAuth = require('../middleware/jwtAuth');
 
-router.get('/', usersController.getAllUsers)
+router.get('/', jwtAuth(['admin']), usersController.getAllUsers)
 router.get('/:id', userValidator.getUserById, usersController.getUserById)
 router.post('/login', usersController.loginUser)
 router.post('/logout', usersController.logoutUser)

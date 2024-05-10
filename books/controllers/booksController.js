@@ -30,6 +30,18 @@ module.exports.getPopularBooks = async (req, res) => {
     }
 }
 
+module.exports.getBooksByGenre = async (req, res) => {
+    try {
+        const books = await Book.find({ genre: req.params.genre })
+        if (!books) {
+            return res.status(404).json({ message: 'Genre not found' });
+        }
+        res.status(200).json({ message: 'Books by genre', data: books})
+    } catch (error) {
+        res.status(500).json({ message: error.message })
+    }
+}
+
 module.exports.findSimilarBooks = async (req, res) => {
     const { search } = req.query;
 
@@ -37,7 +49,7 @@ module.exports.findSimilarBooks = async (req, res) => {
         return res.status(400).json({ message: 'Please provide a search term.' });
     }
 
-    const searchRegex = new RegExp(search, 'i'); // Case-insensitive search
+    const searchRegex = new RegExp(search, 'i'); 
 
     try {
         const books = await Book.find({
@@ -77,6 +89,20 @@ module.exports.createBook = async (req, res) => {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
         return res.status(400).json({ message: 'Validation error', errors: errors.array() })
+    }
+
+    const { author, genre } = req.body;
+
+    // Verify if author exists
+    const authorExists = await Author.exists({ _id: author });
+    if (!authorExists) {
+        return res.status(400).json({ message: 'Author does not exist' });
+    }
+
+    // Verify if genre is correct
+    const validGenres = ['fiction', 'non-fiction', 'fantasy', 'mystery', 'romance'];
+    if (!validGenres.includes(genre)) {
+        return res.status(400).json({ message: 'Invalid genre' });
     }
 
     try {

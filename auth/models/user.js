@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const userSchema = new Schema({
-    fullName: {
+    fullname: {
         type: String,
         required: true
     },
@@ -22,27 +22,11 @@ const userSchema = new Schema({
     },
     birthDate: {
         type: Date,
-        required: true
-    },
-    isAuthor: {
-        type: Boolean,
-        default: false
+        default: null
     },
     photoUrl: {
         type: String,
         default: ''
-    },
-    biography: {
-        type: String,
-        default: ''
-    },
-    penName: {
-        type: String,
-        default: ''
-    },
-    genres: {
-        type: [String],
-        default: []
     }
 }, { timestamps: true })
 

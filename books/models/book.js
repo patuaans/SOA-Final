@@ -7,15 +7,9 @@ const bookSchema = new Schema({
         required: true
     },
     authors: [{
-        author: {
-            type: Schema.Types.ObjectId,
-            ref: 'Author',
-            required: true
-        },
-        name: {
-            type: String,
-            required: true
-        }
+        type: Schema.Types.ObjectId,
+        ref: 'Author',
+        required: true
     }],
     averageRating: {
         type: Number,

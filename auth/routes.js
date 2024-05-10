@@ -1,13 +1,9 @@
 const usersRouter = require('./routes/usersRouter')
-const { cookieJwtAuth } = require('./middleware/jwtAuth')
+const authorsRouter = require('./routes/authorsRouter')
 
 const setupRoutes = (app) => {
-    
-    app.get('/login', (req, res) => {
-        res.json()
-    })
-
     app.use('/users', usersRouter)
+    app.use('/authors', authorsRouter)
 }
 
 module.exports = setupRoutes;
