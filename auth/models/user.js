@@ -27,7 +27,11 @@ const userSchema = new Schema({
     photoUrl: {
         type: String,
         default: ''
-    }
+    },
+    active: {
+        type: Boolean,
+        default: false
+    },
 }, { timestamps: true })
 
 const User = mongoose.model('User', userSchema)
