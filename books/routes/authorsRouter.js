@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const authorsController = require('../controllers/authorsController')
 const { authorValidator } = require('../middleware/authorsValidator')
-const jwtAuth = require('../middleware/jwtAuth');
+const jwtAuth = require('../../auth/middleware/jwtAuth');
 
 router.get('/', authorsController.getAuthors)
 router.get('/:id', authorsController.getAuthor)

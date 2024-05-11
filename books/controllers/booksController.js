@@ -1,4 +1,7 @@
 const Book = require('../models/book')
+const Author = require('../models/author')
+const Genre = require('../models/genre')
+
 const { validationResult } = require('express-validator')
 
 module.exports.getAllBooks = async (req, res) => {
@@ -32,7 +35,7 @@ module.exports.getPopularBooks = async (req, res) => {
 
 module.exports.getBooksByGenre = async (req, res) => {
     try {
-        const books = await Book.find({ genre: req.params.genre })
+        const books = await Book.find({ genres: req.params.genre })
         if (!books) {
             return res.status(404).json({ message: 'Genre not found' });
         }
@@ -91,27 +94,28 @@ module.exports.createBook = async (req, res) => {
         return res.status(400).json({ message: 'Validation error', errors: errors.array() })
     }
 
-    const { author, genre } = req.body;
+    const { authors, genres } = req.body;
 
-    // Verify if author exists
-    const authorExists = await Author.exists({ _id: author });
-    if (!authorExists) {
-        return res.status(400).json({ message: 'Author does not exist' });
+    // Verify if each author exists
+    const authorsExist = await Promise.all(authors.map(authorId => Author.exists({ _id: authorId })));
+    if (authorsExist.includes(false)) {
+        return res.status(400).json({ message: 'One or more authors do not exist' });
     }
 
-    // Verify if genre is correct
-    const validGenres = ['fiction', 'non-fiction', 'fantasy', 'mystery', 'romance'];
-    if (!validGenres.includes(genre)) {
-        return res.status(400).json({ message: 'Invalid genre' });
+    // Verify if each genre exists (assuming you have a Genre model)
+    const genresExist = await Promise.all(genres.map(genreId => Genre.exists({ _id: genreId })));
+    if (genresExist.includes(false)) {
+        return res.status(400).json({ message: 'One or more genres are invalid' });
     }
 
     try {
-        const book = await Book.create(req.body)
-        res.status(201).json({ message: 'Book created', data: book})
+        const book = await Book.create(req.body);
+        res.status(201).json({ message: 'Book created', data: book });
     } catch (error) {
-        res.status(500).json({ message: error.message })
+        res.status(500).json({ message: error.message });
     }
 }
+
 
 module.exports.updateBook = async (req, res) => {
     const errors = validationResult(req);

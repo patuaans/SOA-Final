@@ -22,7 +22,7 @@ const authorValidator = {
         check('penName', 'Pen Name is required').notEmpty(),
         check('genres', 'Genres are required').isArray({ min: 1 }),
         check('genres.*', 'Each genre must be a string').isString(),
-        check('photoUrl', 'Photo URL must be a valid URL').optional().isURL()
+        check('photoUrl', 'Photo URL is required').notEmpty().isURL().withMessage('Photo URL must be a valid URL')
     ],
     updateAuthor: [
         ...objectIdValidator('id'),
@@ -37,7 +37,7 @@ const authorValidator = {
         check('penName', 'Pen Name is required').notEmpty(),
         check('genres', 'Genres are required').isArray({ min: 1 }),
         check('genres.*', 'Each genre must be a string').isString(),
-        check('photoUrl', 'Photo URL is required').notEmpty().isURL().withMessage('Photo URL must be a valid URL')
+        check('photoUrl', 'Photo URL must be a valid URL').optional().isURL()
     ],
     deleteAuthor: [...objectIdValidator('id')]
 };

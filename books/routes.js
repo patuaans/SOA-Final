@@ -1,6 +1,7 @@
 const booksRouter = require('./routes/booksRouter')
 const genresRouter = require('./routes/genresRouter')
 const reportsRouter = require('./routes/reportsRouter')
+const authorsRouter = require('./routes/authorsRouter')
 
 const setupRoutes = (app) => {
     app.get('/', (req, res) => {
@@ -8,6 +9,7 @@ const setupRoutes = (app) => {
     })
 
     app.use('/books', booksRouter)
+    app.use('/authors', authorsRouter)
     app.use('/genres', genresRouter)
     app.use('/reports', reportsRouter)
 }
