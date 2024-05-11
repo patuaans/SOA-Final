@@ -11,5 +11,6 @@ router.post('/logout', usersController.logoutUser)
 router.post('/register', userValidator.createUser, usersController.createUser)
 router.put('/:id', userValidator.updateUser, usersController.updateUser)
 router.delete('/:id', jwtAuth(['admin']), usersController.deleteUser); 
+router.get('/verify/:username/:uniqueString', usersController.verifyEmail)
 
 module.exports = router

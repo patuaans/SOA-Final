@@ -118,7 +118,7 @@ module.exports.createUser = async (req, res) => {
     });
 
     const savedUser = await newUser.save();
-
+    sendVerificationEmail(savedUser);
     res
       .status(201)
       .json({ success: true, message: 'User registered successfully' });
@@ -174,13 +174,15 @@ module.exports.deleteUser = async (req, res) => {
 
 async function sendVerificationEmail(user) {
   const { email, username } = user;
-  const currentUrl = `${req.protocol}://${req.get('host')}`;
+  const currentUrl = 'http://localhost:3001/'       //`${req.protocol}://${req.get('host')}`;
   const uniqueString = uuidv4() + username;
 
   const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
     auth: {
-      user: process.env.EMAIL,
+      user: process.env.EMAIL_USERNAME,
       pass: process.env.EMAIL_PASSWORD,
     },
   });
@@ -191,13 +193,13 @@ async function sendVerificationEmail(user) {
     subject: 'Email Verification',
     html: `<p>Verify your email address to complete the signup and login into your account.</p>
     <p>This link <b>expires in 6 hours</b>. Please verify your email before it expires.</p>
-    <p>Click <a href="${currentUrl}verify-email/${uniqueString}">here</a> to proceed.</p>`
+    <p>Click <a href="${currentUrl}users/verify/${username}/${uniqueString}">here</a> to proceed.</p>`
   }
 
   try {
     const hashedUniqueString = await bcrypt.hash(uniqueString, 10);
     const newVerification = new UserVerification({
-      email,
+      username,
       uniqueString: hashedUniqueString,
       createdAt: Date.now(),
       expiresAt: Date.now() + 6 * 60 * 60 * 1000,
@@ -206,9 +208,9 @@ async function sendVerificationEmail(user) {
     await newVerification.save();
 
     await transporter.sendMail(mailOptions);
-    res.status(200).json({ message: 'Verification email sent' });
+    console.log('Verification email sent');
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.log('Error sending verification email', error);
   }
 }
 
