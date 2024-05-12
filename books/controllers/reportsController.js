@@ -10,6 +10,20 @@ module.exports.getAllReports = async (req, res) => {
     }
 };
 
+module.exports.getReportsByStatus = async (req, res) => {
+    const { status } = req.params;
+
+    try {
+        const reports = await Report.find({ status });
+        if (!reports.length) {
+            return res.status(404).json({ message: 'No reports found with the given status' });
+        }
+        res.status(200).json({ message: `Reports with status ${status}`, data: reports });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports.getReportById = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -33,8 +47,15 @@ module.exports.createReport = async (req, res) => {
         return res.status(400).json({ message: 'Validation error', errors: errors.array() });
     }
 
+    const { book_id, user_id, reason, description, status } = req.body;
+
     try {
-        const newReport = await Report.create(req.body);
+        const newReport = await Report.create({
+            book_id, 
+            user_id, 
+            reason, 
+            description
+        });
         res.status(201).json({ message: 'Report created', data: newReport });
     } catch (error) {
         res.status(500).json({ message: error.message });

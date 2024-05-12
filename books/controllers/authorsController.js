@@ -27,6 +27,23 @@ module.exports.getAuthor = async (req, res) => {
     }
 }
 
+module.exports.getVerifiedAuthors = async (req, res) => {
+    const { verified } = req.query; 
+
+    try {
+        // Convert query parameter to boolean
+        const isVerified = verified === 'true';
+        const authors = await Author.find({ verified: isVerified });
+
+        if (authors.length === 0) {
+            return res.status(404).json({ message: 'No authors found matching the verification status' });
+        }
+        res.status(200).json({ message: `Authors fetched successfully`, data: authors });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports.createAuthor = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

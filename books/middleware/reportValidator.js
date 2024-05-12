@@ -39,7 +39,12 @@ const reportValidator = {
             .isIn(['pending', 'reviewed', 'resolved'])
             .withMessage('Invalid status value')
     ],
-    deleteReport: [...objectIdValidator('id')]
+    deleteReport: [...objectIdValidator('id')],
+    validateReportStatus: [
+        param('status')
+            .isIn(['pending', 'reviewed', 'resolved'])
+            .withMessage('Invalid status value')
+    ]
 };
 
 module.exports = { reportValidator };

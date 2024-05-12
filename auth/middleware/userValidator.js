@@ -17,7 +17,6 @@ const userValidator = {
         check('password', 'Password is required').not().isEmpty(),
         check('password', 'Password must be at least 8 characters long').isLength({ min: 8 }),
         check('email', 'Valid email is required').isEmail(),     
-        check('role', 'Role must be either user or admin').not().isEmpty().isIn(['user', 'admin', 'author']),  
         check('photoUrl', 'Photo URL must be a valid URL').optional().isURL()
     ],
     updateUser: [

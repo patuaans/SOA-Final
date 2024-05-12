@@ -11,11 +11,15 @@ const objectIdValidator = (idName) => [
 const genreValidator = {
     getGenreById: [...objectIdValidator('id')],
     createGenre: [
-        check('name', 'Name is required').not().isEmpty()
+        check('name')
+            .not().isEmpty().withMessage('Name is required')
+            .matches(/^[a-z0-9 ]+$/i).withMessage('Name must contain only alphanumeric characters and spaces')
     ],
     updateGenre: [
         ...objectIdValidator('id'),
-        check('name', 'Name is required').not().isEmpty()
+        check('name')
+            .not().isEmpty().withMessage('Name is required')
+            .matches(/^[a-z0-9 ]+$/i).withMessage('Name must contain only alphanumeric characters and spaces')
     ],
     deleteGenre: [...objectIdValidator('id')]
 }

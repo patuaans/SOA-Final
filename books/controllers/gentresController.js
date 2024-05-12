@@ -1,5 +1,5 @@
 const Genre = require('../models/genre');
-// const { validationResult } = require('express-validator');
+const { validationResult } = require('express-validator');
 
 module.exports.getAllGenres = async (req, res) => {
     try {
@@ -23,6 +23,11 @@ module.exports.getGenreById = async (req, res) => {
 }
 
 module.exports.createGenre = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+    
     try {
         const genre = await Genre.create(req.body);
         res.status(201).json({ message: 'Genre created', data: genre });

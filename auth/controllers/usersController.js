@@ -113,7 +113,6 @@ module.exports.loginUser = async (req, res) => {
 module.exports.logoutUser = (req, res) => {
   res.clearCookie('token');
   res.status(200).json({ message: 'Logout successful' });
-  // res.redirect('/login');
 };
 
 module.exports.createUser = async (req, res) => {
@@ -125,17 +124,19 @@ module.exports.createUser = async (req, res) => {
   }
 
   try {
-    const { username, email } = req.body;
+    const { username, email, fullname, password } = req.body;
     const existingUser = await User.findOne({ username, email});
     if (existingUser) {
       return res.status(409).json({ message: 'User already exists' });
     }
 
     // Hash the password
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
     // Create a new user with the hashed password
     const newUser = new User({
-      ...req.body,
+      username,
+      email,
+      fullname,
       password: hashedPassword,
     });
 
@@ -281,19 +282,19 @@ module.exports.updateUser = async (req, res) => {
       .json({ message: 'Validation error', errors: errors.array() });
   }
 
-  try {
-    const updates = { ...req.body };
-    if (req.body.password) {
-      updates.password = await bcrypt.hash(req.body.password, 10);
-    }
+  const { fullname, birthDate } = req.body;
+    const updates = {}
+    if (fullname) updates.fullname = fullname;
+    if (birthDate) updates.birthDate = birthDate;
 
-    const user = await User.findByIdAndUpdate(req.params.id, updates, {
+  try {
+    const updatedUser  = await User.findByIdAndUpdate(req.params.id, updates, {
       new: true,
     });
-    if (!user) {
+    if (!updatedUser ) {
       return res.status(404).json({ message: 'User not found' });
     }
-    res.status(200).json({ message: 'User updated', data: user });
+    res.status(200).json({ message: 'User updated', data: updatedUser  });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -410,8 +411,8 @@ module.exports.updateProfile = (req, res) => {
     }
 
     try {
-      const { username, email, fullname, birthDate, photoUrl } = req.body;
-      const updates = { username, email, fullname, birthDate, photoUrl };
+      const { fullname, birthDate, photoUrl } = req.body;
+      const updates = { fullname, birthDate, photoUrl };
       
       if (req.file) {
         updates.photoUrl = `./public/images/users/${req.file.filename}`;

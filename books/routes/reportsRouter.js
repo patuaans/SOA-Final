@@ -5,8 +5,9 @@ const { reportValidator } = require('../middleware/reportValidator');
 const { jwtAuth } = require('../middleware/jwtAuth');
 
 router.get('/', jwtAuth(['admin']), reportsController.getAllReports);
+router.get('/status/:status', jwtAuth(['admin']), reportValidator.validateReportStatus, reportsController.getReportsByStatus);
 router.get('/:id', jwtAuth(['admin']), reportValidator.getReportById, reportsController.getReportById);
-router.post('/', jwtAuth(['admin']), reportValidator.createReport, reportsController.createReport);
+router.post('/', jwtAuth(['user', 'admin', 'author']), reportValidator.createReport, reportsController.createReport);
 router.put('/:id', jwtAuth(['admin']), reportValidator.updateReport, reportsController.updateReportStatus);
 router.delete('/:id', jwtAuth(['admin']), reportsController.deleteReport);
 
