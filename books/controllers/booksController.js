@@ -4,16 +4,32 @@ const Genre = require('../models/genre')
 
 const { validationResult } = require('express-validator')
 
-module.exports.getAllBooks = async (req, res) => {
+module.exports.getApprovedBooks = async (req, res) => {
     try {
-        const books = await Book.find()
-            .populate('authors', 'name')
-            .populate('authors', 'author');
-        res.status(200).json({ message: 'All books ', data: books})
+      const books = await Book.find({ approvalStatus: 'approved' });
+      res.status(200).json({ message: 'Approved books', data: books });
     } catch (error) {
-        res.status(500).json({ message: error.message })
+      res.status(500).json({ message: error.message });
     }
-}
+};
+
+module.exports.getPendingBooks = async (req, res) => {
+    try {
+        const books = await Book.find({ approvalStatus: 'pending' });
+        res.status(200).json({ message: 'Pending books', data: books });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+module.exports.getRejectedBooks = async (req, res) => {
+    try {
+        const books = await Book.find({ approvalStatus: 'rejected' });
+        res.status(200).json({ message: 'Rejected books', data: books });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
 
 module.exports.getNewestBooks = async (req, res) => {
     try {
@@ -35,15 +51,40 @@ module.exports.getPopularBooks = async (req, res) => {
 
 module.exports.getBooksByGenre = async (req, res) => {
     try {
-        const books = await Book.find({ genres: req.params.genre })
-        if (!books) {
-            return res.status(404).json({ message: 'Genre not found' });
+        const genreNames = req.query.genres ? req.query.genres.split(',') : [];
+
+        if (!genreNames.length) {
+            return res.status(400).json({ message: 'Genre parameter is required' });
         }
-        res.status(200).json({ message: 'Books by genre', data: books})
+
+        const genres = await Genre.find({ name: { $in: genreNames } });
+
+        if (!genres.length) {
+            return res.status(404).json({ message: 'Genres not found' });
+        }
+
+        const genreIds = genres.map(genre => genre._id);
+
+        let query = Book.find({ genres: { $in: genreIds } });
+
+        const sortOption = req.query.sort;
+        if (sortOption === 'popular') {
+            query = query.sort({ rating: -1 });
+        } else if (sortOption === 'newest') {
+            query = query.sort({ createdAt: -1 });
+        }
+
+        const books = await query;
+
+        if (!books.length) {
+            return res.status(404).json({ message: 'No books found for these genres' });
+        }
+
+        res.status(200).json({ message: 'Books fetched successfully', data: books });
     } catch (error) {
-        res.status(500).json({ message: error.message })
+        res.status(500).json({ message: error.message });
     }
-}
+};
 
 module.exports.findSimilarBooks = async (req, res) => {
     const { search } = req.query;

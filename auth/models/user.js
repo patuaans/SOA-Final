@@ -26,7 +26,11 @@ const userSchema = new Schema({
     },
     photoUrl: {
         type: String,
-        default: ''
+        default: './public/images/users/user.jpg'
+    },
+    role: {
+        type: String,
+        default: 'user'
     },
     active: {
         type: Boolean,

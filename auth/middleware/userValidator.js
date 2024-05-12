@@ -16,7 +16,8 @@ const userValidator = {
         check('username', 'Username must be alphanumeric').isAlphanumeric(),
         check('password', 'Password is required').not().isEmpty(),
         check('password', 'Password must be at least 8 characters long').isLength({ min: 8 }),
-        check('email', 'Valid email is required').isEmail(),        
+        check('email', 'Valid email is required').isEmail(),     
+        check('role', 'Role must be either user or admin').not().isEmpty().isIn(['user', 'admin', 'author']),  
         check('photoUrl', 'Photo URL must be a valid URL').optional().isURL()
     ],
     updateUser: [
@@ -33,6 +34,13 @@ const userValidator = {
         check('username', 'Username or email is required').exists(),
         check('password', 'Password is required').exists()
     ],
+    updateProfile: [
+        check('fullname', 'Full name is required').not().isEmpty(),
+        check('username', 'Username is required').not().isEmpty(),
+        check('username', 'Username must be alphanumeric').isAlphanumeric(),
+        check('email', 'Valid email is required').isEmail(),
+        check('photoUrl', 'Photo URL must be a valid URL').not().isEmpty().isURL()
+    ]
 };
 
-module.exports = { userValidator };
+module.exports = { userValidator }; 

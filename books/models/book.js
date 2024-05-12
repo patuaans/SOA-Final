@@ -11,6 +11,10 @@ const bookSchema = new Schema({
         ref: 'Author',
         required: true
     }],
+    language: {
+        type: String,
+        required: true
+    },
     averageRating: {
         type: Number,
         default: 0

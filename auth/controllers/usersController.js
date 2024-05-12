@@ -6,6 +6,32 @@ const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const { v4: uuidv4 } = require('uuid');
 const UserVerification = require('../models/userVerification');
+const multer = require('multer');
+const path = require('path');
+
+const imageFilter = (req, file, cb) => {
+  const filetypes = /jpeg|jpg|png/;
+  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = filetypes.test(file.mimetype);
+
+  if (mimetype && extname) {
+    return cb(null, true);
+  } else {
+    cb(new Error('Only JPEG, JPG, and PNG files are allowed!'), false);
+  }
+};
+
+const storage = multer.diskStorage({
+  destination: './public/images/users',
+  filename: function (req, file, cb) {
+    cb(null, `${req.user.username}${path.extname(file.originalname)}`);
+  }
+});
+
+const upload = multer({
+  storage: storage,
+  fileFilter: imageFilter,
+})
 
 module.exports.getAllUsers = async (req, res) => {
   try {
@@ -62,15 +88,11 @@ module.exports.loginUser = async (req, res) => {
     const tokenPayload = {
       id: user._id,
       username: user.username,
-      role:
-        user.username === 'admin' ? 'admin' : user.isAuthor ? 'author' : 'user',
+      role: user.role,
       profile: {
-        fullName: user.fullName,
+        fullName: user.fullname,
         email: user.email,
         photoUrl: user.photoUrl,
-        biography: user.biography,
-        penName: user.penName,
-        genres: user.genres,
       },
     };
     const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
@@ -126,6 +148,130 @@ module.exports.createUser = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+module.exports.forgotPassword = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res
+      .status(400)
+      .json({ message: 'Validation error', errors: errors.array() });
+  }
+
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    sendForgotPasswordEmail(user);
+    res.status(200).json({ message: 'Password reset email sent' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+async function sendForgotPasswordEmail(user) {
+  const { email, username } = user;
+  const currentUrl = 'http://localhost:3001/'       //`${req.protocol}://${req.get('host')}`;
+  const uniqueString = uuidv4() + username;
+
+  const transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
+    auth: {
+      user: process.env.EMAIL_USERNAME,
+      pass: process.env.EMAIL_PASSWORD,
+    },
+  });
+
+  const mailOptions = {
+    from: process.env.EMAIL_USERNAME,
+    to: email,
+    subject: 'Password Reset',
+    html: `<p>Click <a href="${currentUrl}users/reset-password/${username}/${uniqueString}">here</a> to reset your password.</p>`
+  }
+
+  try {
+    const hashedUniqueString = await bcrypt.hash(uniqueString, 10);
+    const newReset = new UserVerification({
+      username,
+      uniqueString: hashedUniqueString,
+      createdAt: Date.now(),
+      expiresAt: Date.now() + 6 * 60 * 60 * 1000,
+    });
+
+    const userReset = await UserVerification.findOne({ username });
+    if (userReset) {
+      await UserVerification.deleteOne({ username });
+    }
+
+    await newReset.save();
+    await transporter.sendMail(mailOptions);
+    console.log('Password reset email sent');
+  } catch (error) {
+    console.log('Error sending password reset email', error);
+  }
+}
+
+module.exports.resetPassword = async (req, res) => {
+  const { username, uniqueString } = req.params;
+  const { password } = req.body;
+
+  try {
+    const userVerification = await UserVerification.findOne({ username });
+
+    if (!userVerification) {
+      return res.status(404).json({ message: "Account record doesn't exist or has been verified already" });
+    }
+
+    if (userVerification.expiresAt < Date.now()) {
+      await UserVerification.deleteOne({ username });
+      return res.status(400).json({ message: 'Password reset link has expired' });
+    }
+
+    const isMatch = await bcrypt.compare(uniqueString, userVerification.uniqueString);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Invalid password reset link' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await User.updateOne({ username }, { password: hashedPassword });
+    await UserVerification.deleteOne({ username });
+    res.status(200).json({ message: 'Password reset successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+module.exports.changePassword = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res
+      .status(400)
+      .json({ message: 'Validation error', errors: errors.array() });
+  }
+
+  try {
+    const { username, oldPassword, newPassword } = req.body;
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const isPasswordMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isPasswordMatch) {
+      return res.status(401).json({ message: 'Invalid Credentials' });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await User.updateOne({ username }, { password: hashedPassword });
+    res.status(200).json({ message: 'Password changed successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
 
 module.exports.updateUser = async (req, res) => {
   const errors = validationResult(req);
@@ -256,3 +402,29 @@ module.exports.resendVerificationEmail = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 }
+
+module.exports.updateProfile = (req, res) => {
+  upload.single('avatar')(req, res, async (err) => {
+    if (err) {
+      return res.status(400).json({ message: 'Error: ' + err.message });
+    }
+
+    try {
+      const { username, email, fullname, birthDate, photoUrl } = req.body;
+      const updates = { username, email, fullname, birthDate, photoUrl };
+      
+      if (req.file) {
+        updates.photoUrl = `./public/images/users/${req.file.filename}`;
+      }
+
+      const user = await User.findByIdAndUpdate(req.user.id, updates, { new: true });
+      
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      res.status(200).json({ message: 'Profile updated successfully', data: user });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+};
