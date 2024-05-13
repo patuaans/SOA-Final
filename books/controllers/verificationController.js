@@ -54,7 +54,7 @@ module.exports.updateApplication = async (req, res) => {
         }
 
         if (status === 'approved') {
-            await Author.findByIdAndUpdate(application.authorId, { verified: true });
+            await Author.findByIdAndUpdate(application.authorId, { verified: true, userId: application.userId });
         }
         res.status(200).json({ message: 'Application updated', data: application });
     } catch (error) {

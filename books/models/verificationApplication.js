@@ -7,6 +7,11 @@ const verificationApplicationSchema = new Schema({
         ref: 'Author',
         required: true
     },
+    userId: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
     description: { type: String, required: true },
     linkToPublications: { type: String, required: false },
     imageProofUrl: { type: String, required: false },
