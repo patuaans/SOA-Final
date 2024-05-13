@@ -4,9 +4,9 @@ const booksController = require('../controllers/booksController')
 const { bookValidator } = require('../middleware/bookValidator')
 const { jwtAuth } = require('../middleware/jwtAuth')
 
-router.get('/approved', booksController.getApprovedBooks)
-router.get('/pending', booksController.getPendingBooks)
-router.get('/rejected', booksController.getRejectedBooks)
+router.get('/approved', jwtAuth(['admin']), booksController.getApprovedBooks)
+router.get('/pending', jwtAuth(['admin']), booksController.getPendingBooks)
+router.get('/rejected', jwtAuth(['admin']), booksController.getRejectedBooks)
 router.get('/newest', booksController.getNewestBooks)
 router.get('/popular', booksController.getPopularBooks)
 router.get('/similar', booksController.findSimilarBooks);
