@@ -8,7 +8,7 @@ router.get('/', jwtAuth(['admin']), authorsController.getAuthors)
 router.get('/verified', jwtAuth(['admin', 'user', 'author']), authorsController.getVerifiedAuthors);
 router.get('/:id', authorsController.getAuthor)
 router.post('/', jwtAuth(['user', 'admin']),authorValidator.createAuthor, authorsController.createAuthor)
-router.put('/:id', authorValidator.updateAuthor, authorsController.updateAuthor)
+router.put('/:id', jwtAuth(['user', 'admin', 'author']), authorValidator.updateAuthor, authorsController.updateAuthor)
 router.delete('/:id', jwtAuth(['admin']), authorsController.deleteAuthor)
 
 module.exports = router

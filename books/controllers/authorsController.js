@@ -64,16 +64,29 @@ module.exports.updateAuthor = async (req, res) => {
         return res.status(400).json({ message: 'Validation error', errors: errors.array() });
     }
 
+    const { id } = req.params;
     try {
-        const author = await Author.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        // First, find the author to check if the user is allowed to update it
+        const author = await Author.findById(id);
         if (!author) {
             return res.status(404).json({ message: 'Author not found' });
         }
-        res.status(200).json({ message: 'Author updated', data: author });
+
+        // Check if the author's userId matches the logged-in user's id
+        if (author.userId) {
+            if (author.userId !== req.user.id) {
+                return res.status(403).json({ message: 'Unauthorized to update this author' });
+            }
+        } 
+
+        // Perform the update since the user is authorized or there is no userId restriction
+        const updatedAuthor = await Author.findByIdAndUpdate(id, req.body, { new: true });
+        res.status(200).json({ message: 'Author updated successfully', data: updatedAuthor });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
-}
+};
+
 
 module.exports.deleteAuthor = async (req, res) => {
     const errors = validationResult(req);
