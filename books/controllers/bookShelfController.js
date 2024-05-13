@@ -103,3 +103,29 @@ exports.removeBookFromShelf = async (req, res) => {
     }
 };
 
+exports.moveBookToShelf = async (req, res) => {
+    const { sourceShelfId, destShelfId, bookId } = req.params;
+    if (!(await userAuthorized(sourceShelfId, req.user.id)) || !(await userAuthorized(destShelfId, req.user.id))) {
+        return res.status(403).json({ success: false, message: "Unauthorized access to source or destination shelf" });
+    }
+
+    try {
+        // Remove book from source shelf
+        const sourceUpdate = await BookShelf.findByIdAndUpdate(
+            sourceShelfId,
+            { $pull: { books: bookId } },
+            { new: true }
+        );
+
+        // Add book to destination shelf
+        const destUpdate = await BookShelf.findByIdAndUpdate(
+            destShelfId,
+            { $addToSet: { books: bookId } },
+            { new: true }
+        );
+
+        handleResponse(res, 200, { sourceUpdate, destUpdate }, 'Book moved successfully');
+    } catch (error) {
+        handleError(error, res);
+    }
+};

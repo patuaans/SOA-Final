@@ -4,6 +4,7 @@ const booksController = require('../controllers/booksController')
 const { bookValidator } = require('../middleware/bookValidator')
 const { jwtAuth } = require('../middleware/jwtAuth')
 
+router.get('/', booksController.getAllBooks)
 router.get('/approved', jwtAuth(['admin']), booksController.getApprovedBooks)
 router.get('/pending', jwtAuth(['admin']), booksController.getPendingBooks)
 router.get('/rejected', jwtAuth(['admin']), booksController.getRejectedBooks)

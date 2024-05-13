@@ -6,6 +6,7 @@ const jwtAuth = require('../../auth/middleware/jwtAuth');
 
 router.get('/:userId', jwtAuth(['user', 'author', 'admin']), bookShelfController.getUserBookShelves);
 router.post('/', jwtAuth(['user', 'author', 'admin']), bookShekfValidator, bookShelfController.createBookShelf);
+router.post('/move/:sourceShelfId/:destShelfId/:bookId', jwtAuth(['user', 'author', 'admin']), bookShelfController.moveBookToShelf);
 router.put('/:shelfId', jwtAuth(['user', 'author', 'admin']), bookShekfValidator, bookShelfController.updateBookShelf);
 router.delete('/:shelfId', jwtAuth(['user', 'author', 'admin']), bookShelfController.deleteBookShelf);
 router.post('/:shelfId/books/:bookId', jwtAuth(['user', 'author', 'admin']), bookShelfController.addBookToShelf);

@@ -4,6 +4,16 @@ const Genre = require('../models/genre')
 
 const { validationResult } = require('express-validator')
 
+module.exports.getAllBooks = async (req, res) => {
+    try {
+        const books = await Book.find({ approvalStatus: 'approved' })
+        res.status(200).json({ message: 'All approved books', data: books })
+    } catch (error) {
+        res.status(500).json({ message: error.message })
+    }
+}
+
+
 module.exports.getApprovedBooks = async (req, res) => {
     try {
       const books = await Book.find({ approvalStatus: 'approved' });
