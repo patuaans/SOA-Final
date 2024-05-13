@@ -193,3 +193,21 @@ module.exports.deleteBook = async (req, res) => {
         res.status(500).json({ message: error.message })
     }
 }
+
+module.exports.updateBookApprovalStatus = async (req, res) => {
+    const { approvalStatus } = req.body;
+
+    if (!['pending', 'approved', 'rejected'].includes(approvalStatus)) {
+        return res.status(400).json({ message: 'Invalid approval status' });
+    }
+
+    try {
+        const book = await Book.findByIdAndUpdate(req.params.id, { approvalStatus }, { new: true });
+        if (!book) {
+            return res.status(404).json({ message: 'Book not found' });
+        }
+        res.status(200).json({ message: 'Book approval status updated', data: book });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
