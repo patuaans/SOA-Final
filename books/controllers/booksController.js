@@ -6,13 +6,20 @@ const { validationResult } = require('express-validator')
 
 module.exports.getAllBooks = async (req, res) => {
     try {
-        const books = await Book.find({ approvalStatus: 'approved' })
-        res.status(200).json({ message: 'All approved books', data: books })
-    } catch (error) {
-        res.status(500).json({ message: error.message })
-    }
-}
+        const books = await Book.find({
+            approvalStatus: 'approved',
+            reportCount: { $lt: 5 }  
+        });
 
+        if (books.length === 0) {
+            return res.status(404).json({ message: 'No approved books with less than 5 reports found' });
+        }
+
+        res.status(200).json({ message: 'All approved books with less than 5 reports', data: books });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
 
 module.exports.getApprovedBooks = async (req, res) => {
     try {
