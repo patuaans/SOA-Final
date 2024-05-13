@@ -5,6 +5,11 @@ const Author = require('../models/author');
 module.exports.createApplication = async (req, res) => {
     const { authorId, description, linkToPublications, imageProofUrl } = req.body;
 
+    const author = await Author.findById(authorId);
+    if (!author) {
+        return res.status(404).json({ message: 'Author not found' });
+    }
+
     try {
         const application = await VerificationApplication.create({
             authorId,
