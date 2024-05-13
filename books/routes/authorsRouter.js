@@ -7,7 +7,7 @@ const jwtAuth = require('../../auth/middleware/jwtAuth');
 router.get('/', authorsController.getAuthors)
 router.get('/verified', jwtAuth(['admin', 'user']), authorsController.getVerifiedAuthors);
 router.get('/:id', authorsController.getAuthor)
-router.post('/', authorValidator.createAuthor, authorsController.createAuthor)
+router.post('/', jwtAuth(['user', 'admin']),authorValidator.createAuthor, authorsController.createAuthor)
 router.put('/:id', authorValidator.updateAuthor, authorsController.updateAuthor)
 router.delete('/:id', jwtAuth(['admin']), authorsController.deleteAuthor)
 
