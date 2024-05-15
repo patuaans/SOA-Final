@@ -1,5 +1,21 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const { v4: uuidv4 } = require('uuid');
+
+const seriesSchema = new Schema({
+    title: {
+        type: String,
+        required: true
+    },
+    description: {
+        type: String,
+        required: true
+    },
+    books: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Book'
+    }]
+}, { timestamps: true });
 
 const bookSchema = new Schema({
     title: {
@@ -11,7 +27,18 @@ const bookSchema = new Schema({
         ref: 'Author',
         required: true
     }],
-    language: {
+    series: {
+        type: seriesSchema,
+        ref: 'Series',
+    },
+    workId: {
+        type: String,
+        required: true,
+        unique: true,
+        default: uuidv4
+
+    },
+    description: {
         type: String,
         required: true
     },
@@ -19,23 +46,37 @@ const bookSchema = new Schema({
         type: Number,
         default: 0
     },
-    ratingsCount: {
+    totalRatings: {
         type: Number,
         default: 0
     },
-    textReviewsCount: {
+    totalReviews: {
         type: Number,
         default: 0
     },
-    publicationDate: {
+    publishedYear: {
         type: Date,
         required: true
     },
-    publisher: {
+    genres: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Genre',
+        required: true
+    }]
+}, { timestamps: true });
+
+
+const editionSchema = new Schema({
+    book: {
+        type: Schema.Types.ObjectId,
+        ref: 'Book',
+        required: true
+    },
+    title: {
         type: String,
         required: true
     },
-    description: {
+    format: {
         type: String,
         required: true
     },
@@ -43,12 +84,19 @@ const bookSchema = new Schema({
         type: Number,
         required: true
     },
-    genres: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Genre',
+    publisher: {
+        type: String,
         required: true
-    }],
-    imageUrl: {
+    },
+    publicationDate: {
+        type: Date,
+        required: true
+    },
+    coverImage: {
+        type: String,
+        required: true
+    },
+    language: {
         type: String,
         required: true
     },
@@ -62,16 +110,13 @@ const bookSchema = new Schema({
             required: true
         }
     }],
-    approvalStatus: {
-        type: String,
-        enum: ['pending', 'approved', 'rejected'],
-        default: 'pending'
-    },
     reportCount: {
         type: Number,
         default: 0
     }
 }, { timestamps: true });
 
+const Series = mongoose.model('Series', seriesSchema);
+const Edition = mongoose.model('Edition', editionSchema);
 const Book = mongoose.model('Book', bookSchema);
-module.exports = Book;
+module.exports = { Series, Book, Edition };
