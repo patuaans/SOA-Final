@@ -157,14 +157,14 @@ module.exports.createBook = async (req, res) => {
     // Verify if each author exists
     if (authors && authors.length > 0) {
         const authorsExist = await Promise.all(authors.map(authorId => Author.exists({ _id: authorId })));
-        if (authorsExist.includes(false)) {
+        if (authorsExist.includes(null)) {
             return res.status(400).json({ message: 'One or more authors do not exist' });
         }
     }
 
     // Verify if each genre exists (assuming you have a Genre model)
     const genresExist = await Promise.all(genres.map(genreId => Genre.exists({ _id: genreId })));
-    if (genresExist.includes(false)) {
+    if (genresExist.includes(null)) {
         return res.status(400).json({ message: 'One or more genres are invalid' });
     }
 
